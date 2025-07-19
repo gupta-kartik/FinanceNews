@@ -1,0 +1,19 @@
+{
+  "name": "finance-news-aggregator",
+  "version": "1.0.0",
+  "description": "A Bloomberg-style financial news aggregator for Indian markets",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["finance", "news", "aggregator", "india", "markets"],
+  "author": "gupta-kartik",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "xml2js": "^0.6.2",
+    "cors": "^2.8.5"
+  }
+}

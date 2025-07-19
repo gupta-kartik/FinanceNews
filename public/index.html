@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceNews - Professional Market Updates</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">FinanceNews</h1>
+                <div class="header-info">
+                    <span class="last-updated" id="lastUpdated">Loading...</span>
+                    <button class="refresh-btn" id="refreshBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Loading State -->
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <span>Loading latest financial news...</span>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <p>Unable to fetch latest news. Showing cached data.</p>
+            </div>
+
+            <!-- Trending Section -->
+            <section class="trending-section" id="trendingSection">
+                <h2 class="section-title">
+                    <span class="trending-icon">🔥</span>
+                    Trending Now
+                </h2>
+                <div class="trending-container" id="trendingContainer">
+                    <!-- Trending news will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Main News Section -->
+            <section class="news-section">
+                <div class="section-header">
+                    <h2 class="section-title">Latest Market News</h2>
+                    <span class="news-count" id="newsCount">0 articles</span>
+                </div>
+                <div class="news-grid" id="newsGrid">
+                    <!-- News articles will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 FinanceNews. Sources: Moneycontrol, Economic Times, NDTV Profit, CNBC TV18</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
