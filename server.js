@@ -3,6 +3,12 @@ const fetch = require('node-fetch');
 const xml2js = require('xml2js');
 const cors = require('cors');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+
+// Open Banking modules
+const openBankingRoutes = require('./openbanking/routes');
+const swaggerSpec = require('./openbanking/swagger');
+const { openBankingCORS, errorHandler } = require('./openbanking/middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -208,13 +214,51 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
+// =============================================================================
+// OPEN BANKING API ROUTES
+// =============================================================================
+
+// Open Banking API documentation
+app.use('/openbanking/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Open Banking API Documentation'
+}));
+
+// Open Banking API routes with CORS and error handling
+app.use('/openbanking/v1', openBankingCORS, openBankingRoutes);
+
+// Open Banking error handling middleware
+app.use('/openbanking', errorHandler);
+
+// =============================================================================
+// EXISTING NEWS API ROUTES
+// =============================================================================
+
 // Serve the main page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve the Open Banking demo page
+app.get('/openbanking.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'openbanking.html'));
 });
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Finance News Aggregator running on port ${PORT}`);
   console.log(`Open http://localhost:${PORT} to view the application`);
+  console.log(`\n=== Open Banking API Endpoints ===`);
+  console.log(`📚 API Documentation: http://localhost:${PORT}/openbanking/docs`);
+  console.log(`🔐 TPP Authentication: http://localhost:${PORT}/openbanking/v1/tpp/auth`);
+  console.log(`🔑 TPP Registration: http://localhost:${PORT}/openbanking/v1/tpp/register`);
+  console.log(`📋 Consent Management: http://localhost:${PORT}/openbanking/v1/consent`);
+  console.log(`🏦 Account Information: http://localhost:${PORT}/openbanking/v1/accounts`);
+  console.log(`💰 Funds Confirmation: http://localhost:${PORT}/openbanking/v1/funds-confirmation`);
+  console.log(`💸 Payment Initiation: http://localhost:${PORT}/openbanking/v1/payments`);
+  console.log(`\n=== Demo Credentials ===`);
+  console.log(`Client ID: demo_client_001`);
+  console.log(`Client Secret: demo_secret_001`);
+  console.log(`User ID: user_001`);
 });

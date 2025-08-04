@@ -87,6 +87,25 @@ body {
     color: var(--text-primary);
 }
 
+.openbanking-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--accent-color);
+    transition: var(--transition);
+}
+
+.openbanking-link:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
 /* Main Content */
 .main {
     padding: 2rem 0;
