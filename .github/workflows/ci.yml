@@ -1,0 +1,151 @@
+name: CI/CD Pipeline with Test Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting (if configured)
+      run: npm run lint --if-present
+
+    - name: Run tests with coverage
+      run: npm run test:ci
+
+    - name: Check coverage threshold
+      run: npm run coverage:check
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+    - name: Archive test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.node-version }}
+        path: |
+          coverage/
+          test-results.xml
+
+    - name: Archive coverage reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report-${{ matrix.node-version }}
+        path: coverage/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application (if applicable)
+      run: npm run build --if-present
+
+    - name: Start application for smoke test
+      run: |
+        npm start &
+        sleep 10
+        curl -f http://localhost:3000/api/news || exit 1
+        curl -f http://localhost:3000/api/trending || exit 1
+
+  coverage-enforcement:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests with coverage
+      run: npm run test:coverage
+
+    - name: Enforce coverage threshold
+      run: npm run coverage:check
+
+    - name: Comment coverage results on PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const coverageFile = path.join(process.cwd(), 'coverage', 'coverage-summary.json');
+            const coverage = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+            
+            const lines = coverage.total.lines.pct;
+            const functions = coverage.total.functions.pct;
+            const branches = coverage.total.branches.pct;
+            const statements = coverage.total.statements.pct;
+            
+            const body = `## Test Coverage Report
+            
+            | Metric | Coverage | Threshold | Status |
+            |--------|----------|-----------|---------|
+            | Lines | ${lines}% | 90% | ${lines >= 90 ? '✅' : '❌'} |
+            | Functions | ${functions}% | 90% | ${functions >= 90 ? '✅' : '❌'} |
+            | Branches | ${branches}% | 90% | ${branches >= 90 ? '✅' : '❌'} |
+            | Statements | ${statements}% | 90% | ${statements >= 90 ? '✅' : '❌'} |
+            
+            ${lines >= 90 && functions >= 90 && branches >= 90 && statements >= 90 
+              ? '🎉 All coverage thresholds met!' 
+              : '⚠️ Some coverage thresholds not met. Please add more tests.'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+          } catch (error) {
+            console.error('Error reading coverage report:', error);
+          }

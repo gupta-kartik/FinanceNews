@@ -15,3 +15,17 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+
+# Test coverage outputs
+coverage/
+.nyc_output/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+*.pid
+*.pid.lock
