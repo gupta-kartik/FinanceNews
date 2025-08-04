@@ -7,6 +7,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Disable X-Powered-By header for security
+app.disable('x-powered-by');
+
 // Middleware
 app.use(cors());
 app.use(express.static('public'));
