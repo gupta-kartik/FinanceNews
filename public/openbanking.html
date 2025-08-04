@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Banking Consent Management - FinanceNews</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .consent-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+        
+        .consent-form {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--primary-color);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--secondary-color);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .permission-item input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            background: var(--accent-color);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn.secondary {
+            background: var(--text-muted);
+        }
+        
+        .btn.secondary:hover {
+            background: #5a6268;
+        }
+        
+        .consent-list {
+            margin-top: 2rem;
+        }
+        
+        .consent-item {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            background: var(--secondary-color);
+        }
+        
+        .consent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .consent-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-granted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-revoked {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .api-demo {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--secondary-color);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .demo-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .demo-section h4 {
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+        
+        .demo-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">FinanceNews</a>
+                <div class="header-info">
+                    <span class="last-updated">Open Banking Demo</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <a href="/" class="back-link">
+                ← Back to News
+            </a>
+            
+            <div class="consent-container">
+                <h1>Open Banking Consent Management</h1>
+                <p>This demo shows how third-party providers can request and manage user consent for accessing financial data.</p>
+                
+                <div id="alertContainer"></div>
+                
+                <!-- TPP Authentication Section -->
+                <div class="demo-section">
+                    <h3>1. Third Party Provider Authentication</h3>
+                    <p>First, authenticate as a registered TPP to get an access token:</p>
+                    
+                    <div class="form-group">
+                        <label>Client ID:</label>
+                        <input type="text" id="clientId" value="demo_client_001" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Client Secret:</label>
+                        <input type="text" id="clientSecret" value="demo_secret_001" readonly>
+                    </div>
+                    
+                    <button class="btn" onclick="authenticateTPP()">Authenticate TPP</button>
+                    
+                    <div id="tokenDisplay" style="display: none; margin-top: 1rem;">
+                        <label>Access Token:</label>
+                        <textarea id="accessToken" rows="3" readonly></textarea>
+                    </div>
+                </div>
+
+                <!-- Consent Creation Section -->
+                <div class="demo-section">
+                    <h3>2. Create Consent Request</h3>
+                    <p>Request user consent for accessing their financial data:</p>
+                    
+                    <div class="consent-form">
+                        <div class="form-group">
+                            <label for="userId">User ID:</label>
+                            <input type="text" id="userId" value="user_001" placeholder="Enter user ID">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Permissions:</label>
+                            <div class="permissions-grid">
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm_account_info" value="account_info" checked>
+                                    <label for="perm_account_info">Account Information</label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm_balance_check" value="balance_check" checked>
+                                    <label for="perm_balance_check">Balance Check</label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm_payment_init" value="payment_initiation">
+                                    <label for="perm_payment_init">Payment Initiation</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="validityPeriod">Validity Period (days):</label>
+                            <input type="number" id="validityPeriod" value="90" min="1" max="365">
+                        </div>
+                        
+                        <button class="btn" onclick="createConsent()">Create Consent Request</button>
+                    </div>
+                </div>
+
+                <!-- Consent Management Section -->
+                <div class="demo-section">
+                    <h3>3. Consent Management</h3>
+                    <div id="consentDisplay"></div>
+                    <button class="btn secondary" onclick="loadConsents()">Refresh Consents</button>
+                </div>
+
+                <!-- API Demo Section -->
+                <div class="api-demo">
+                    <h3>4. API Usage Examples</h3>
+                    <p>Once consent is granted, you can access the user's financial data:</p>
+                    
+                    <div class="demo-section">
+                        <h4>Get Accounts</h4>
+                        <div class="demo-code">curl -X GET http://localhost:3000/openbanking/v1/accounts \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-consent-id: YOUR_CONSENT_ID"</div>
+                        <button class="btn" onclick="testAccountsAPI()">Test Accounts API</button>
+                    </div>
+                    
+                    <div class="demo-section">
+                        <h4>Get Transactions</h4>
+                        <div class="demo-code">curl -X GET http://localhost:3000/openbanking/v1/accounts/acc_001_001/transactions \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-consent-id: YOUR_CONSENT_ID"</div>
+                        <button class="btn" onclick="testTransactionsAPI()">Test Transactions API</button>
+                    </div>
+                    
+                    <div class="demo-section">
+                        <h4>Check Funds</h4>
+                        <div class="demo-code">curl -X POST http://localhost:3000/openbanking/v1/funds-confirmation \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "x-consent-id: YOUR_CONSENT_ID" \
+  -d '{"accountId":"acc_001_001","amount":1000}'</div>
+                        <button class="btn" onclick="testFundsAPI()">Test Funds Check API</button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsContainer" style="display: none; margin-top: 2rem;">
+                    <h3>API Response</h3>
+                    <pre id="apiResults" class="demo-code"></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentToken = '';
+        let currentConsentId = '';
+
+        async function authenticateTPP() {
+            try {
+                const response = await fetch('/openbanking/v1/tpp/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        client_id: document.getElementById('clientId').value,
+                        client_secret: document.getElementById('clientSecret').value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentToken = data.access_token;
+                    document.getElementById('accessToken').value = currentToken;
+                    document.getElementById('tokenDisplay').style.display = 'block';
+                    showAlert('TPP authenticated successfully!', 'success');
+                } else {
+                    showAlert('Authentication failed: ' + data.error_description, 'error');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function createConsent() {
+            if (!currentToken) {
+                showAlert('Please authenticate TPP first', 'error');
+                return;
+            }
+
+            const permissions = [];
+            document.querySelectorAll('.permission-item input:checked').forEach(checkbox => {
+                permissions.push(checkbox.value);
+            });
+
+            try {
+                const response = await fetch('/openbanking/v1/consent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + currentToken
+                    },
+                    body: JSON.stringify({
+                        userId: document.getElementById('userId').value,
+                        permissions: permissions,
+                        validityPeriod: parseInt(document.getElementById('validityPeriod').value)
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentConsentId = data.consentId;
+                    showAlert('Consent request created successfully!', 'success');
+                    loadConsents();
+                } else {
+                    showAlert('Consent creation failed: ' + data.error_description, 'error');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function grantConsent(consentId, approved) {
+            try {
+                const response = await fetch(`/openbanking/v1/consent/${consentId}/grant`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        approved: approved
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(`Consent ${approved ? 'granted' : 'rejected'} successfully!`, 'success');
+                    if (approved) {
+                        currentConsentId = consentId;
+                    }
+                    loadConsents();
+                } else {
+                    showAlert('Consent update failed: ' + data.error_description, 'error');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function loadConsents() {
+            // This is a simplified demo - in real implementation, 
+            // you'd have proper user session management
+            const display = document.getElementById('consentDisplay');
+            display.innerHTML = '<p>Demo consent management interface. In a real implementation, this would show user-specific consents.</p>';
+        }
+
+        async function testAccountsAPI() {
+            if (!currentToken || !currentConsentId) {
+                showAlert('Please authenticate and create/grant consent first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/openbanking/v1/accounts', {
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken,
+                        'x-consent-id': currentConsentId
+                    }
+                });
+
+                const data = await response.json();
+                showResults(data);
+            } catch (error) {
+                showAlert('API test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testTransactionsAPI() {
+            if (!currentToken || !currentConsentId) {
+                showAlert('Please authenticate and create/grant consent first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/openbanking/v1/accounts/acc_001_001/transactions?limit=5', {
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken,
+                        'x-consent-id': currentConsentId
+                    }
+                });
+
+                const data = await response.json();
+                showResults(data);
+            } catch (error) {
+                showAlert('API test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testFundsAPI() {
+            if (!currentToken || !currentConsentId) {
+                showAlert('Please authenticate and create/grant consent first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/openbanking/v1/funds-confirmation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + currentToken,
+                        'x-consent-id': currentConsentId
+                    },
+                    body: JSON.stringify({
+                        accountId: 'acc_001_001',
+                        amount: 1000,
+                        currency: 'INR'
+                    })
+                });
+
+                const data = await response.json();
+                showResults(data);
+            } catch (error) {
+                showAlert('API test failed: ' + error.message, 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function showResults(data) {
+            const container = document.getElementById('resultsContainer');
+            const results = document.getElementById('apiResults');
+            results.textContent = JSON.stringify(data, null, 2);
+            container.style.display = 'block';
+        }
+
+        // Auto-grant any pending consent for demo purposes
+        function autoGrantPendingConsent() {
+            if (currentConsentId) {
+                setTimeout(() => {
+                    grantConsent(currentConsentId, true);
+                }, 1000);
+            }
+        }
+
+        // Set up auto-grant after consent creation
+        const originalCreateConsent = createConsent;
+        createConsent = async function() {
+            await originalCreateConsent();
+            autoGrantPendingConsent();
+        };
+    </script>
+</body>
+</html>
