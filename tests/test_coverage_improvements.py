@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import patch
 from app.models import User, NewsArticle, SavedArticle, UserPreference
+from app.news.service import NewsService
 from app import db
 
 class TestCoverageImprovements:
@@ -206,16 +207,14 @@ class TestCoverageImprovements:
     def test_news_service_edge_cases(self, app):
         """Test news service edge cases for better coverage"""
         with app.app_context():
-            # Test get_trending_topics with error
-            with patch('app.current_app.logger.error') as mock_logger:
-                trending = NewsService.get_trending_topics()
-                # Should return mock data even with potential errors
-                assert isinstance(trending, list)
-                assert len(trending) > 0
+            # Test get_trending_topics functionality
+            trending = NewsService.get_trending_topics()
+            # Should return mock data
+            assert isinstance(trending, list)
+            assert len(trending) > 0
             
-            # Test analyze_sentiment with error handling
-            with patch('app.current_app.logger.error') as mock_logger:
-                sentiment = NewsService.analyze_sentiment("test text")
-                # Should return a valid sentiment score
-                assert isinstance(sentiment, (int, float))
-                assert -1.0 <= sentiment <= 1.0
+            # Test analyze_sentiment functionality
+            sentiment = NewsService.analyze_sentiment("test text")
+            # Should return a valid sentiment score
+            assert isinstance(sentiment, (int, float))
+            assert -1.0 <= sentiment <= 1.0
